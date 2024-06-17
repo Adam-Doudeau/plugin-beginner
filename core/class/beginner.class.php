@@ -18,7 +18,7 @@
 /* * ***************************Includes********************************* */
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
-class template extends eqLogic {
+class beginner extends eqLogic {
   /*     * *************************Attributs****************************** */
 
   /*
@@ -62,8 +62,17 @@ class template extends eqLogic {
 
   /*
   * Fonction exécutée automatiquement toutes les heures par Jeedom
-  public static function cronHourly() {}
   */
+  public static function cronHourly() {
+    foreach(self::byType('beginner', true) as $news) {
+      $cmd = $news->getCmd(null, 'refresh');
+      if(!is_object($cmd)){
+        continue;
+      }
+      $cmd->execCmd();
+    };
+  }
+  
 
   /*
   * Fonction exécutée automatiquement tous les jours par Jeedom
@@ -117,10 +126,35 @@ class template extends eqLogic {
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave() {
+    $this->setDisplay("width","800px");
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
   public function postSave() {
+    $info = $this->getCmd(null, 'news');
+    if (!is_object($info)) {
+      $info = new beginnerCmd();
+      $info->setName(__('News', __FILE__));
+    }
+    $info->setLogicalId('news');
+    $info->setEqLogic_id($this->getId());
+    $info->setType('info');
+    $info->setTemplate('dashboard','beginner');
+    $this->setConfiguration("type","mon_type");
+    $this->setConfiguration("number","mon_type");
+    $info->setSubType('string');
+    $info->save();
+
+    $refresh = $this->getCmd(null, 'refresh');
+    if (!is_object($refresh)) {
+      $refresh = new beginnerCmd();
+      $refresh->setName(__('Rafraichir', __FILE__));
+    }
+    $refresh->setEqLogic_id($this->getId());
+    $refresh->setLogicalId('refresh');
+    $refresh->setType('action');
+    $refresh->setSubType('other');
+    $refresh->save();
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
@@ -144,13 +178,47 @@ class template extends eqLogic {
 
   /*
   * Permet de modifier l'affichage du widget (également utilisable par les commandes)
-  public function toHtml($_version = 'dashboard') {}
   */
+  public function toHtml($_version = 'dashboard') {
+    $replace = $this->preToHtml($_version);
+    if(!is_array($replace)) {
+      return $replace;
+    }
+
+    $news = $this->getCmd(null, 'news');
+    $replace['#news#'] = is_object($news) ? $news->execCmd() : 'Test';
+    $version = jeedom::versionAlias($_version);
+    log::add('beginner','debug', print_r($replace,true));
+		$html = $this->postToHtml($_version,template_replace($replace, getTemplate('core', $version , 'beginner', __CLASS__)));
+    log::add('beginner','debug', print_r($html,true));
+    return $html;
+  }
+  
+  
+  public function News(){
+
+    $type = $this->getConfiguration("type");
+    $cmd = $this->getCmd('info','title');
+    log::add('beginner','debug', $type);
+    $url = "https://www.lemonde.fr/{$type}/rss_full.xml";
+    $number = $this->getConfiguration("number");
+    $data = file_get_contents($url);
+    @$dom = new DOMDocument();
+    libxml_use_internal_errors(true);
+    $dom->loadXML($data);
+    libxml_use_internal_errors(false);
+    $xpath = new DOMXPath($dom);
+    $divs = $xpath->query('//channel//item[position() <= '. $number .']//title');
+    foreach ($divs as $div) {
+      $temp[] = $div->nodeValue;
+    }
+    return $temp;
+  }
 
   /*     * **********************Getteur Setteur*************************** */
 }
 
-class templateCmd extends cmd {
+class beginnerCmd extends cmd {
   /*     * *************************Attributs****************************** */
 
   /*
@@ -171,6 +239,15 @@ class templateCmd extends cmd {
 
   // Exécution d'une commande
   public function execute($_options = array()) {
+    switch ($this->getLogicalId()) {
+      case 'refresh': //LogicalId de la commande rafraîchir que l’on a créé dans la méthode Postsave de la classe beginner .
+        $eqlogic = $this->getEqLogic(); //Récupération de l’eqlogic
+        $info = $eqlogic->News() ; //Lance la fonction et stocke le résultat dans la variable $info
+        foreach ($info as $new) {
+          $eqlogic->checkAndUpdateCmd('news', $new);
+        }
+      break;
+    }
   }
 
   /*     * **********************Getteur Setteur*************************** */

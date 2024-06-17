@@ -3,7 +3,7 @@ if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
 }
 // Déclaration des variables obligatoires
-$plugin = plugin::byId('template');
+$plugin = plugin::byId('beginner');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
@@ -25,7 +25,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 				<span>{{Configuration}}</span>
 			</div>
 		</div>
-		<legend><i class="fas fa-table"></i> {{Mes templates}}</legend>
+		<legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
 		<?php
 		if (count($eqLogics) == 0) {
 			echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Template trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
@@ -128,11 +128,23 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 							<legend><i class="fas fa-cogs"></i> {{Paramètres spécifiques}}</legend>
 							<div class="form-group">
-								<label class="col-sm-4 control-label">{{Nom du paramètre n°1}}
+								<label class="col-sm-4 control-label">{{Type de News}}
 									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le paramètre n°1 de l'équipement}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="param1" placeholder="{{Paramètre n°1}}">
+									<select class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="type">
+										<option value="jeux-video">{{Jeux Video}}</option>
+										<option value="cultures-web">{{Culture Web}}</option>
+										<option value="espace">{{Espace}}</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<label class="col-sm-4 control-label"> {{Nombre d'article}}
+									<sup><i class="fas fa-question-circle tooltips" title="{{Nombre d'article}}"></i></sup>
+								</label>
+								<div class="col-sm-6">
+									<input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="number">
 								</div>
 							</div>
 							<div class="form-group">
@@ -140,7 +152,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 									<sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le mot de passe}}"></i></sup>
 								</label>
 								<div class="col-sm-6">
-									<input type="text" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
+									<input type="number" class="eqLogicAttr form-control inputPassword" data-l1key="configuration" data-l2key="password">
 								</div>
 							</div>
 							<!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
@@ -204,6 +216,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 </div><!-- /.row row-overflow -->
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
-<?php include_file('desktop', 'template', 'js', 'template'); ?>
+<?php include_file('desktop', 'beginner', 'js', 'beginner'); ?>
 <!-- Inclusion du fichier javascript du core - NE PAS MODIFIER NI SUPPRIMER -->
 <?php include_file('core', 'plugin.template', 'js'); ?>
