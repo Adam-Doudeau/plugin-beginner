@@ -131,25 +131,26 @@ class beginner extends eqLogic {
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
   public function postSave() {
+    $this->setConfiguration("type","mon_type");
+    $this->setConfiguration("number","mon_type");
     $info = $this->getCmd(null, 'news');
     if (!is_object($info)) {
       $info = new beginnerCmd();
-      $info->setName(__('News', __FILE__));
     }
+    $info->setName(__('News', __FILE__));
     $info->setLogicalId('news');
     $info->setEqLogic_id($this->getId());
     $info->setType('info');
     $info->setTemplate('dashboard','beginner');
-    $this->setConfiguration("type","mon_type");
-    $this->setConfiguration("number","mon_type");
     $info->setSubType('string');
-    $info->save();
+    $info->save();    
 
     $refresh = $this->getCmd(null, 'refresh');
     if (!is_object($refresh)) {
       $refresh = new beginnerCmd();
-      $refresh->setName(__('Rafraichir', __FILE__));
+      
     }
+    $refresh->setName(__('Rafraichir', __FILE__));
     $refresh->setEqLogic_id($this->getId());
     $refresh->setLogicalId('refresh');
     $refresh->setType('action');
@@ -184,34 +185,56 @@ class beginner extends eqLogic {
     if(!is_array($replace)) {
       return $replace;
     }
-
-    $news = $this->getCmd(null, 'news');
-    $replace['#news#'] = is_object($news) ? $news->execCmd() : 'Test';
     $version = jeedom::versionAlias($_version);
-    log::add('beginner','debug', print_r($replace,true));
-		$html = $this->postToHtml($_version,template_replace($replace, getTemplate('core', $version , 'beginner', __CLASS__)));
-    log::add('beginner','debug', print_r($html,true));
+    $news = $this->News();
+    $numberArticle = $this->getConfiguration('number');
+
+    $text = '';
+    for ($i=0; $i < $numberArticle; $i++) { 
+      $text .= '<div style="border: 1px black solid;"><h4>' . $news[$i]->title . '</h4><p>' . $news[$i]->description . '</p><a href=' . $news[$i]->link . '> En savoir plus</a></div>';
+    }
+    
+    $replace['#articles#'] = $text;    
+
+    
+    
+
+		$html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version , 'beginner', __CLASS__)));
     return $html;
   }
+  // public function toHtml($_version = 'dashboard') {
+  //   $replace = $this->preToHtml($_version);
+  //   if (!is_array($replace)) {
+  //     return $replace;
+  //   }
+  //   $version = jeedom::versionAlias($_version);
+
+  //   $replace['#baliseTest#'] = 'Salut !!!';
+  //   return $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'beginner', __CLASS__)));
+  // }
   
   
   public function News(){
 
     $type = $this->getConfiguration("type");
-    $cmd = $this->getCmd('info','title');
-    log::add('beginner','debug', $type);
-    $url = "https://www.lemonde.fr/{$type}/rss_full.xml";
     $number = $this->getConfiguration("number");
-    $data = file_get_contents($url);
+    
+    $cmd = $this->getCmd('info','title');
+    
+    $url = "https://www.lemonde.fr/{$type}/rss_full.xml";
+    $data = simplexml_load_file($url, 'SimpleXMLElement', LIBXML_NOCDATA);
     @$dom = new DOMDocument();
     libxml_use_internal_errors(true);
     $dom->loadXML($data);
     libxml_use_internal_errors(false);
     $xpath = new DOMXPath($dom);
-    $divs = $xpath->query('//channel//item[position() <= '. $number .']//title');
-    foreach ($divs as $div) {
-      $temp[] = $div->nodeValue;
+    
+    for ($i=0; $i < $number ; $i++) { 
+      $temp[] = $data->channel->item[$i];
+        
+        
     }
+    //$eqlogic->checkAndUpdateCmd('news', $news);
     return $temp;
   }
 
@@ -243,9 +266,6 @@ class beginnerCmd extends cmd {
       case 'refresh': //LogicalId de la commande rafraîchir que l’on a créé dans la méthode Postsave de la classe beginner .
         $eqlogic = $this->getEqLogic(); //Récupération de l’eqlogic
         $info = $eqlogic->News() ; //Lance la fonction et stocke le résultat dans la variable $info
-        foreach ($info as $new) {
-          $eqlogic->checkAndUpdateCmd('news', $new);
-        }
       break;
     }
   }

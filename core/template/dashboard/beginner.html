@@ -1,0 +1,147 @@
+<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd  eqLogic_layout_default" data-type="info"
+    data-subtype="string" data-template="tile" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#"
+    data-eqLogic_id="3">
+    <div class="widget-name"> 
+        <span style="color:#background-color#" title=""> 
+            <i class=''></i> 
+        </span> 
+        <span class="cmd refresh pull-right cursor" data-cmd_id="#id#"> 
+            <i class="fas fa-sync"></i> 
+        </span> 
+        <span class="panelLink pull-left cursor"> 
+            <a href="">
+                <i class="fas fa-external-link-alt"></i>
+            </a> 
+        </span> 
+        <span class="reportModeVisible">
+            Equipment-1 <span class="object_name">Salle de bain</span>
+        </span> 
+        <a href="index.php?v=d&p=beginner&m=beginner&id=3" class="reportModeHidden">
+            Equipment-1 <span class="object_name">Salle de bain</span>
+        </a> 
+    </div>
+    <div class="title">
+        <div class="content-xs"> <span class="cmdName ">News</span> <span class="value"></span> <strong
+                class="unit"></strong> </div>
+    </div>
+
+    <div class="content">
+        <div id="displayArticle">
+            #articles#
+            <span class="value state"></span> <span class="unit"></span>
+        </div>
+    </div>
+    <div class="timeCmd label label-default #history#" data-type="info"></div>
+    <div class="form-group">
+        <label class="col-sm-4 control-label">Type de News</label>
+        <div class="col-sm-6">
+            <select class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="type" name="type">
+                <option value="jeux-video">Jeux Video</option>
+                <option value="cultures-web">Culture Web</option>
+                <option value="espace">Espace</option>
+            </select>
+        </div>
+        <button type="submit">Valider</button>
+    </div>
+    <script>
+        jeedom.cmd.addUpdateFunction('#id#', function (_options) {
+            if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="#uid#"]'))) {
+                cmd.querySelector('.content').setAttribute('title', '{{Date de valeur}}: ' + _options.valueDate + '<br>{{Date de collecte}}: ' + _options.collectDate)
+                if ('#time#' == 'duration' || '#time#' == 'date') {
+                    jeedom.cmd.displayDuration(_options.valueDate, cmd.querySelector('.timeCmd'), '#time#')
+                }
+
+                cmd.querySelector('.value').innerHTML = _options.display_value
+                cmd.querySelector('.unit').innerHTML = _options.unit
+
+                if (_options.alertLevel == 'warning') {
+                    cmd.querySelector('.value').innerHTML = '<span class="label label-warning"><i class="fas fa-bell"></i> ' + _options.value + '</span>'
+                } else if (_options.alertLevel == 'danger') {
+                    cmd.querySelector('.value').innerHTML = '<span class="label label-danger"><i class="fas fa-exclamation"></i> ' + _options.value + '</span>'
+                }
+            }
+        })
+
+        jeedom.cmd.refreshValue([{ cmd_id: '#id#', value: '#value#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#' }])
+
+        if ('' == '') { 
+            document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .panelLink')?.remove() 
+        } 
+        if ('#id#' != '') { 
+            document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .refresh')?.addEventListener('click', function () { 
+                jeedom.cmd.execute({ id: '#id#' })
+                jeedom.cmd.setConfiguration('type','jeux-video')
+            }) 
+        } 
+        else { 
+            document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .refresh')?.remove() 
+        }   
+    </script>
+</div>
+<!-- 
+<div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd  eqLogic_layout_default" data-eqType="beginner" data-eqLogic_id="3" 
+    data-eqLogic_uid="eqLogic3__1187267016__" data-version="dashboard" data-translate-category="" data-category="" data-tags="" style="width: 800px;height: auto;">
+    <div class="widget-name"> 
+        <span style="color:#background-color#" title=""> 
+            <i class=''></i> 
+        </span> 
+        <span class="cmd refresh pull-right cursor" data-cmd_id="27"> 
+            <i class="fas fa-sync"></i> 
+        </span> 
+        <span class="panelLink pull-left cursor"> 
+            <a href="">
+                <i class="fas fa-external-link-alt"></i>
+            </a> 
+        </span> 
+        <span class="reportModeVisible">
+            Equipment-1 <span class="object_name">Salle de bain</span>
+        </span> 
+        <a href="index.php?v=d&p=beginner&m=beginner&id=3" class="reportModeHidden">
+            Equipment-1 <span class="object_name">Salle de bain</span>
+        </a> 
+    </div>
+    <div class="cmds ">
+        <div class="cmd cmd-widget " data-type="info" data-subtype="string" data-template="default" data-cmd_id="26"
+            data-cmd_uid="cmd26__1018774979__" data-version="dashboard" data-eqLogic_id="3">
+            <div class="content-xs"> 
+                <span class="cmdName "> #articles#</span> 
+                <span class="value"></span> 
+                <strong class="unit"></strong> 
+            </div>
+            <div class="timeCmd label label-default " data-type="info"></div>
+        </div>
+    </div>
+    <script>     
+        jeedom.cmd.addUpdateFunction('26', function (_options) { 
+            if (is_object(cmd = document.querySelector('.cmd[data-cmd_uid="cmd26__1018774979__"]'))) { 
+                cmd.querySelector('.content-xs').setAttribute('title', 'Date de valeur: ' + _options.valueDate + '<br>Date de collecte: ' + _options.collectDate)         
+                if ('#time#' == 'duration' || '#time#' == 'date') { 
+                    jeedom.cmd.displayDuration(_options.valueDate, cmd.querySelector('.timeCmd'), '#time#') 
+                } 
+                cmd.querySelector('.value').innerHTML = _options.display_value         
+                cmd.querySelector('.unit').innerHTML = _options.unit          
+                if (_options.alertLevel == 'warning') { 
+                    cmd.querySelector('.value').innerHTML = '<span class="label label-warning"><i class="fas fa-bell"></i> ' + _options.value + '</span>' 
+                } else if 
+                (_options.alertLevel == 'danger') { 
+                    cmd.querySelector('.value').innerHTML = '<span class="label label-danger"><i class="fas fa-exclamation"></i> ' + _options.value + '</span>' 
+                } 
+            } 
+        })      
+        jeedom.cmd.refreshValue([{ cmd_id: '26', value: 'William Anders, astronaute membre de la mission Apollo 8, est mort à 90 ans dans un accident d’avion', display_value: 'William Anders, astronaute membre de la mission Apollo 8, est mort à 90 ans dans un accident d’avion', valueDate: '2024-06-27 10:00:04', collectDate: '2024-06-27 10:00:04', alertLevel: 'none', unit: '' }])  
+    </script>
+
+    <script>
+        if ('' == '') { 
+            document.querySelector('.eqLogic[data-eqLogic_uid="eqLogic3__1187267016__"] .panelLink')?.remove() 
+        } 
+        if ('27' != '') { 
+            document.querySelector('.eqLogic[data-eqLogic_uid="eqLogic3__1187267016__"] .refresh')?.addEventListener('click', function () { 
+                jeedom.cmd.execute({ id: '27' }) 
+            }) 
+        } 
+        else { 
+            document.querySelector('.eqLogic[data-eqLogic_uid="eqLogic3__1187267016__"] .refresh')?.remove() 
+        }   
+    </script>
+</div> -->
