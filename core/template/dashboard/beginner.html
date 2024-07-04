@@ -1,8 +1,38 @@
+<style>
+    .loader {
+        border: 16px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 16px solid #3498db;
+        width: 120px;
+        height: 120px;
+        -webkit-animation: spin 1s linear infinite; /* Safari */
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .content{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .no_display{
+        display: none;
+    }
+</style>
+
+
+
 <div class="eqLogic eqLogic-widget text-center allowResize allowReorderCmd  eqLogic_layout_default" data-type="info"
     data-subtype="string" data-template="tile" data-cmd_id="#id#" data-cmd_uid="#uid#" data-version="#version#"
-    data-eqLogic_id="3">
+    data-eqLogic_id="#eqLogic_id#">
     <div class="widget-name"> 
-        <span style="color:#background-color#" title=""> 
+        <span title=""> 
             <i class=''></i> 
         </span> 
         <span class="cmd refresh pull-right cursor" data-cmd_id="#id#"> 
@@ -26,22 +56,17 @@
     </div>
 
     <div class="content">
-        <div id="displayArticle">
+        <div class="displayArticle">
             #articles#
             <span class="value state"></span> <span class="unit"></span>
         </div>
+        <div class="loader no_display" id='load'></div>
     </div>
     <div class="timeCmd label label-default #history#" data-type="info"></div>
-    <div class="form-group">
-        <label class="col-sm-4 control-label">Type de News</label>
-        <div class="col-sm-6">
-            <select class="form-control eqLogicAttr" data-l1key="configuration" data-l2key="type" name="type">
-                <option value="jeux-video">Jeux Video</option>
-                <option value="cultures-web">Culture Web</option>
-                <option value="espace">Espace</option>
-            </select>
-        </div>
-        <button type="submit">Valider</button>
+    <div>
+        <button onclick='changeType(54)'>Culture Web</button>
+        <button onclick='changeType(47)'>Espace</button>
+        <button onclick='changeType(39)'>Jeux Video</button>
     </div>
     <script>
         jeedom.cmd.addUpdateFunction('#id#', function (_options) {
@@ -61,21 +86,25 @@
                 }
             }
         })
-
-        jeedom.cmd.refreshValue([{ cmd_id: '#id#', value: '#value#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#' }])
-
         if ('' == '') { 
-            document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .panelLink')?.remove() 
+            //document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .panelLink')?.remove() 
         } 
         if ('#id#' != '') { 
             document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .refresh')?.addEventListener('click', function () { 
                 jeedom.cmd.execute({ id: '#id#' })
-                jeedom.cmd.setConfiguration('type','jeux-video')
             }) 
         } 
         else { 
             document.querySelector('.eqLogic[data-cmd_uid="#uid#"] .refresh')?.remove() 
         }   
+
+        function changeType(id){
+            jeedom.cmd.execute({id: id});
+            document.querySelector('.displayArticle')?.remove()
+            document.getElementById('load').classList.toggle('no_display');
+            setTimeout(function() { document.querySelector('.eqLogic[data-cmd_uid="#uid#"]')?.remove(); }, 1000);
+        }
+        jeedom.cmd.refreshValue([{ cmd_id: '#id#', value: '#value#', display_value: '#state#', valueDate: '#valueDate#', collectDate: '#collectDate#', alertLevel: '#alertLevel#', unit: '#unite#' }])
     </script>
 </div>
 <!-- 

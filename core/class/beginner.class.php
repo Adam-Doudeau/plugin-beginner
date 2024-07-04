@@ -127,6 +127,7 @@ class beginner extends eqLogic {
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave() {
     $this->setDisplay("width","800px");
+    $this->setDisplay("height","500px");
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
@@ -156,6 +157,44 @@ class beginner extends eqLogic {
     $refresh->setType('action');
     $refresh->setSubType('other');
     $refresh->save();
+
+    $jeux_video = $this->getCmd(null, 'jeux-video');
+    if (!is_object($jeux_video)) {
+      $jeux_video = new beginnerCmd();
+      
+    }
+    $jeux_video->setName(__('Jeux_video', __FILE__));
+    $jeux_video->setEqLogic_id($this->getId());
+    $jeux_video->setLogicalId('jeux-video');
+    $jeux_video->setType('action');
+    $jeux_video->setSubType('other');
+    $jeux_video->save();
+
+    $cultures_web = $this->getCmd(null, 'cultures-web');
+    if (!is_object($cultures_web)) {
+      $cultures_web = new beginnerCmd();
+      
+    }
+    $cultures_web->setName(__('Cultures_web', __FILE__));
+    $cultures_web->setEqLogic_id($this->getId());
+    $cultures_web->setLogicalId('cultures-web');
+    $cultures_web->setType('action');
+    $cultures_web->setSubType('other');
+    $cultures_web->save();
+  
+
+    $espace = $this->getCmd(null, 'espace');
+    if (!is_object($espace)) {
+      $espace = new beginnerCmd();
+      
+    }
+    $espace->setName(__('Espace', __FILE__));
+    $espace->setEqLogic_id($this->getId());
+    $espace->setLogicalId('espace');
+    $espace->setType('action');
+    $espace->setSubType('other');
+    $espace->save();
+  
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
@@ -185,13 +224,16 @@ class beginner extends eqLogic {
     if(!is_array($replace)) {
       return $replace;
     }
+
     $version = jeedom::versionAlias($_version);
-    $news = $this->News();
+    $eqNews  = cmd::byEqLogicIdAndLogicalId($this->getId(), 'news');
+    
+    $news    = $eqNews->getConfiguration('content');
     $numberArticle = $this->getConfiguration('number');
 
     $text = '';
     for ($i=0; $i < $numberArticle; $i++) { 
-      $text .= '<div style="border: 1px black solid;"><h4>' . $news[$i]->title . '</h4><p>' . $news[$i]->description . '</p><a href=' . $news[$i]->link . '> En savoir plus</a></div>';
+      $text .= '<div style="border: 1px black solid;"><h4>' . $news[$i]['title'] . '</h4><p>' . $news[$i]['description'] . '</p><a href=' . $news[$i]['link'] . '> En savoir plus</a></div>';
     }
     
     $replace['#articles#'] = $text;    
@@ -216,6 +258,8 @@ class beginner extends eqLogic {
   
   public function News(){
 
+    //$newsCmd = cmd::byEqLogicIdAndLogicalId($eqlogic->getId(), 'news');//
+    //$newsCmd->execCmd();
     $type = $this->getConfiguration("type");
     $number = $this->getConfiguration("number");
     
@@ -262,12 +306,55 @@ class beginnerCmd extends cmd {
 
   // Exécution d'une commande
   public function execute($_options = array()) {
+    log::add('beginner','debug','test'.$this->getLogicalId());
+    $eqlogic = $this->getEqLogic(); //Récupération de l’eqlogic
     switch ($this->getLogicalId()) {
       case 'refresh': //LogicalId de la commande rafraîchir que l’on a créé dans la méthode Postsave de la classe beginner .
-        $eqlogic = $this->getEqLogic(); //Récupération de l’eqlogic
-        $info = $eqlogic->News() ; //Lance la fonction et stocke le résultat dans la variable $info
+        $eqlogic->News(); //Lance la fonction et stocke le résultat dans la variable $info
       break;
+
+      case 'jeux-video':
+        log::add('beginner','debug','jeux_video');
+        $eqlogic->setConfiguration("type", 'jeux-video');
+        $eqlogic->save(true);
+        $newsCmd = cmd::byEqLogicIdAndLogicalId($eqlogic->getId(), 'news');
+        if(is_object($newsCmd)) {
+          $news = $eqlogic->News();
+          $newsCmd->setConfiguration('content', $news);
+          $newsCmd->save(true);
+          log::add('beginner','debug','cmd'.json_encode($news));
+          $newsCmd->event($this->getLogicalId());
+          
+        }
+        break;
+      case 'espace':
+        log::add('beginner','debug','espace');
+        $eqlogic->setConfiguration("type", 'espace');
+        $eqlogic->save(true);
+        $newsCmd = cmd::byEqLogicIdAndLogicalId($eqlogic->getId(), 'news');
+        if(is_object($newsCmd)) {
+          $news = $eqlogic->News();
+          $newsCmd->setConfiguration('content', $news);
+          $newsCmd->save(true);
+          log::add('beginner','debug','cmd'.json_encode($news));
+          $newsCmd->event($this->getLogicalId());
+        }
+        break;
+        case 'cultures-web':
+          log::add('beginner','debug','cultures-web');
+          $eqlogic->setConfiguration("type", 'cultures-web');
+          $eqlogic->save(true);
+          $newsCmd = cmd::byEqLogicIdAndLogicalId($eqlogic->getId(), 'news');
+          if(is_object($newsCmd)) {
+            $news = $eqlogic->News();
+            $newsCmd->setConfiguration('content', $news);
+            $newsCmd->save(true);
+            log::add('beginner','debug','cmd'.json_encode($news));
+            $newsCmd->event($this->getLogicalId());
+          }
+          break;
     }
+    $eqlogic->refreshWidget();
   }
 
   /*     * **********************Getteur Setteur*************************** */
